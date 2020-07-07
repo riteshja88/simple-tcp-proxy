@@ -268,11 +268,19 @@ main(int argc, char *argv[])
     int client = -1;
     int server = -1;
     int master_sock = -1;
+    double timeout_secs = 86400;
 
-    if (5 != argc) {
-		fprintf(stderr, "usage: %s laddr lport rhost rport\n", argv[0]);
+    if (5 != argc && 6 != argc) {
+		fprintf(stderr, "usage: %s laddr lport rhost rport [timeout_secs]\n", argv[0]);
 		exit(1);
     }
+
+	if(6 == argc) {
+		timeout_secs = atof(argv[5]);
+		if(timeout_secs < 1) {
+			timeout_secs = 86400;
+		}
+	}
 
     localaddr = strdup(argv[1]);
     localport = atoi(argv[2]);
@@ -292,12 +300,12 @@ main(int argc, char *argv[])
     master_sock = create_server_sock(localaddr, localport);
 	time_t start_t, end_t;
 	double diff_t;
-	printf("Starting of the program...\n");
+	printf("Starting of the program... (timeout = %f seconds)\n",timeout_secs);
 	time(&start_t);
     for (;;) {
 		time(&end_t);
 		diff_t = difftime(end_t, start_t);
-		if(diff_t > 86400) {
+		if(diff_t > timeout_secs) {
 			printf("Exiting after 30 seconds\n");
 			return 0;
 		}
